@@ -54,11 +54,11 @@ class App(tk.Frame) :
             time_text.set('Click to reduce time interval by 20% : {} points'.format(int(prixtime)))
 
     def farm(*args):
-        global recolte
+        global recolte, time
         global glb_text
         global lvl_pack1, lvl_pack2, lvl_pack3, lvl_pack4
-        recolte += lvl_pack1*1 + lvl_pack2*2 + lvl_pack3*5 + lvl_pack4*10
-        glb_text.set('{} points'.format(int(recolte)))
+        recolte += lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100
+        glb_text.set('{} points ({} points/s)'.format(int(recolte), ((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time))))
 
     def pack1(*args):
         global prix1, lvl_pack1, btn_text1, recolte
@@ -113,7 +113,7 @@ def idle_task():
     global lvl_pack1, lvl_pack2, lvl_pack3, lvl_pack4
     recolte += lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100
     print(recolte)
-    glb_text.set('{} points'.format(int(recolte)))
+    glb_text.set('{} points ({} points/s)'.format(int(recolte), ((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time))))
     app.after(time, idle_task)
 
 fenetre = tk.Tk()
@@ -124,8 +124,8 @@ btn_text1 = tk.StringVar()
 btn_text2 = tk.StringVar()
 btn_text3 = tk.StringVar()
 btn_text4 = tk.StringVar()
-glb_text.set('{} points'.format(recolte))
-time_text.set('Click to reduce time interval by 5% : {} points'.format(int(prixtime)))
+glb_text.set('{} points ({} points/s)'.format(int(recolte), ((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time))))
+time_text.set('Click to reduce time interval by 20% : {} points'.format(int(prixtime)))
 btn_text1.set('Increase pack 1 power : {} points'.format(prix1))
 btn_text2.set('Increase pack 2 power : {} points'.format(prix2))
 btn_text3.set('Increase pack 3 power : {} points'.format(prix3))
