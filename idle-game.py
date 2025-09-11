@@ -1,13 +1,9 @@
 ﻿import tkinter as tk
-import time
-
 
 # to do 
+# - prestige mode with a multiplier
 # - display pack level + max out pack
 # - dynamic packs
-#       - 2 entry list for packs with price and level with max 10 packs
-#       - create a button with button text var
-# - prestige mode with a multiplier
 # - add textures
 
 class App(tk.Frame) :
@@ -18,40 +14,27 @@ class App(tk.Frame) :
         self.create_widgets()
 
     def create_widgets(self):
-        global prix1, prix2, prix3, prix4
-        global btn_text1, btn_text2, btn_text3, btn_text4
+        global pack_options
         global glb_text
-
+        global time_text, prixtime
         self.fenprinc = tk.Canvas(self,width = '1280', height = '720', bg = 'white')
         self.fenprinc.pack()
 
         self.recolte_label = tk.Label(self.master, textvariable = glb_text)
+        glb_text.set('10 points (1.0 points/s)')
         self.recolte_label.place(x=270,y=30)
-       
-        self.fenprinc.create_text(30,100, text = 'Pack 1')
-        self.pack1_button = tk.Button(self.master, textvariable = btn_text1, command = self.pack1)
-        self.pack1_button.place(x=300,y=90)
 
-        self.fenprinc.create_text(30,150, text= 'Pack 2')        
-        self.pack2_button = tk.Button(self.master, textvariable = btn_text2, command = self.pack2)
-        self.pack2_button.place(x=300,y=140)
-        
-        self.fenprinc.create_text(30,200, text= 'Pack 3')
-        self.pack3_button = tk.Button(self.master, textvariable = btn_text3, command = self.pack3)
-        self.pack3_button.place(x=300,y=190)
-        
-        self.fenprinc.create_text(30,250, text= 'Pack 4')
-        self.pack4_button = tk.Button(self.master, textvariable = btn_text4, command = self.pack4)
-        self.pack4_button.place(x=300,y=240)
+        self.fenprinc.create_text(30,100, text= 'Time')
+        time_text.set('Click to reduce time interval by 20% : {} points'.format(int(prixtime)))
+        tk.Button(self.master, textvariable = time_text, command = self.time).place(x=300,y=90)
 
-        self.fenprinc.create_text(30,300, text= 'Time')
-        self.farm_button = tk.Button(self.master, textvariable = time_text, command = self.time)
-        self.farm_button.place(x=300,y=290)
+        self.fenprinc.create_text(30,150, text= 'Farm')
+        tk.Button(self.master, text = 'Click to farm', command = self.farm).place(x=300,y=140)
 
-        self.fenprinc.create_text(30,350, text= 'Farm')
-        self.farm_button = tk.Button(self.master, text = 'Click to farm', command = self.farm)
-        self.farm_button.place(x=300,y=340)
-
+        for i in range(len(pack_options)):
+            self.fenprinc.create_text(30,200+50*i, text = 'Pack {}'.format(i+1))
+            pack_options[i][3].set('Increase pack {} power : {} points'.format(i+1, int(pack_options[i][1])))            
+            tk.Button(self.master, textvariable = pack_options[i][3], command = lambda j=i : pack(j)).place(x=300,y=190 + 50*i)
 
     def time(*args):
         global time, recolte, prixtime
@@ -65,85 +48,64 @@ class App(tk.Frame) :
     def farm(*args):
         global recolte, time
         global glb_text
-        global lvl_pack1, lvl_pack2, lvl_pack3, lvl_pack4
-        recolte += lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100
-        glb_text.set('{} points ({} points/s)'.format(int(recolte), round((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time), 2)))
+        global pack_options
+        delta = 0
+        for i in range(len(pack_options)):
+            delta += pack_options[i][0]*pack_options[i][4]
+        recolte+=delta
+        glb_text.set('{} points ({} points/s)'.format(int(recolte), round((delta)*(1000/time), 2)))
 
-    def pack1(*args):
-        global prix1, lvl_pack1, btn_text1, recolte
-        if(recolte >= prix1):
-            recolte -= prix1
-            lvl_pack1 += 1
-            prix1 *= 1.2
-            btn_text1.set('Increase pack 1 power : {} points'.format(int(prix1)))
-
-    def pack2(*args):
-        global prix2, lvl_pack2, recolte
-        if(recolte >= prix2):
-            recolte -= prix2
-            lvl_pack2 += 1
-            prix2 *= 1.4
-            btn_text2.set('Increase pack 2 power : {} points'.format(int(prix2)))
-    
-    def pack3(*args):
-        global prix3, lvl_pack3, recolte
-        if(recolte >= prix3):
-            recolte -= prix3
-            lvl_pack3 += 1
-            prix3 *= 1.8
-            btn_text3.set('Increase pack 3 power : {} points'.format(int(prix3)))
-    
-    def pack4(*args):
-        global prix4, lvl_pack4, recolte
-        if(recolte >= prix4):
-            recolte -= prix4
-            lvl_pack4 += 1 
-            prix4 *= 2
-            btn_text4.set('Increase pack 4 power : {} points'.format(int(prix4)))
 
 # init variables
+def pack(args):
+    print('pack {}'.format(args))
+    global recolte
+    global pack_options
+    if(recolte >= pack_options[args][1]):
+        recolte -= pack_options[args][1]
+        pack_options[args][0] += 1
+        pack_options[args][1] *= pack_options[args][2] 
+        pack_options[args][3].set('Increase pack {} power : {} points'.format(args+1, int(pack_options[args][1])))
 
-recolte = 10
-lvl_pack1 = 1
-lvl_pack2 = 0
-lvl_pack3 = 0
-lvl_pack4 = 0
-prix1 = 200
-prix2 = 1000
-prix3 = 5000
-prix4 = 10000
-prixtime = 1000
-time = 1000
 
 def idle_task():
     global recolte
     global glb_text
     global time
-    global lvl_pack1, lvl_pack2, lvl_pack3, lvl_pack4
-    recolte += lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100
+    global pack_options
+    delta = 0
+    for i in range(len(pack_options)):
+        delta += pack_options[i][0]*pack_options[i][4]
+    recolte+=delta
     print(recolte)
-    glb_text.set('{} points ({} points/s)'.format(int(recolte), round((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time), 2)))
+    glb_text.set('{} points ({} points/s)'.format(int(recolte), round(delta*(1000/time), 2)))
     app.after(time, idle_task)
 
-fenetre = tk.Tk()
-# text varaibles
-glb_text = tk.StringVar()
-time_text = tk.StringVar()
-btn_text1 = tk.StringVar()
-btn_text2 = tk.StringVar()
-btn_text3 = tk.StringVar()
-btn_text4 = tk.StringVar()
-glb_text.set('{} points ({} points/s)'.format(int(recolte), round((lvl_pack1*1 + lvl_pack2*20 + lvl_pack3*50 + lvl_pack4*100)*(1000/time), 2)))
-time_text.set('Click to reduce time interval by 20% : {} points'.format(int(prixtime)))
-btn_text1.set('Increase pack 1 power : {} points'.format(prix1))
-btn_text2.set('Increase pack 2 power : {} points'.format(prix2))
-btn_text3.set('Increase pack 3 power : {} points'.format(prix3))
-btn_text4.set('Increase pack 4 power : {} points'.format(prix4))
-# ######
-app = App(master = fenetre)
-app.after(time, idle_task)
-app.mainloop()
 
 
-# if __name__ == "__main__" : 
+
+if __name__ == "__main__" : 
+#init var
+    recolte = 10
+    cur_pack_amt = 4
+    prixtime = 1000
+    time = 1000
+# init tk 
+    fenetre = tk.Tk()
+    pack_options = [
+        # lvl, price, increase, text, multipier
+        [1, 200, 1.2, tk.StringVar(), 1],
+        [0, 1000, 1.4, tk.StringVar(), 20],
+        [0, 5000, 1.8, tk.StringVar(), 50],
+        [0, 10000, 2, tk.StringVar(), 100]
+    ]
+    # text varaibles
+    glb_text = tk.StringVar()
+    time_text = tk.StringVar()
+#init app
+    app = App(master = fenetre)
+#main loop
+    app.after(time, idle_task)
+    app.mainloop()
+
 
