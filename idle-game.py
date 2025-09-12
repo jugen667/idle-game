@@ -1,7 +1,6 @@
 import tkinter as tk
 
 # to do 
-# - prestige mode with a multiplier
 # - add textures + desgin 
 
 class App(tk.Frame) :
@@ -37,7 +36,7 @@ class App(tk.Frame) :
         self.fenprinc = tk.Canvas(self,width = '600', height = '900')
         self.fenprinc.pack()
 
-        tk.Label(self.fenprinc, textvariable = self.globalText).place(x=200,y=30)
+        tk.Label(self.fenprinc, textvariable = self.globalText).place(x=220,y=30)
 
         tk.Button(self.fenprinc, text = 'Click to farm', command = self.farm).place(x=250,y=90)
 
@@ -46,7 +45,10 @@ class App(tk.Frame) :
         for i in range(len(self.packOptions)):
             tk.Label(self.fenprinc, textvariable = self.packOptions[i][5]).place(x=30,y=250 + 50*i)
             self.packOptions[i][5].set('Pack {} : level {}'.format(i+1, self.packOptions[i][0]))            
-            self.packOptions[i][3].set('Increase pack {} power : {:.2E} points'.format(i+1, int(self.packOptions[i][1])))            
+            if(int(self.packOptions[i][1]) > 10000):
+                self.packOptions[i][3].set('Increase pack {} power : {:.2E} points'.format(i+1, int(self.packOptions[i][1])))
+            else:
+                self.packOptions[i][3].set('Increase pack {} power : {} points'.format(i+1, int(self.packOptions[i][1])))
             tk.Button(self.fenprinc, textvariable = self.packOptions[i][3], command = lambda j=i : self.pack_upgrade(j)).place(x=300,y=240 + 50*i)
 
 
@@ -55,7 +57,10 @@ class App(tk.Frame) :
         if(i < 10):
             tk.Label(self.fenprinc, textvariable = self.packOptions[i][5]).place(x = 30, y=250 + 50*i)
             self.packOptions[i][5].set('Pack {} : level {}'.format(i+1, self.packOptions[i][0]))            
-            self.packOptions[i][3].set('Increase pack {} power : {:.2E} points'.format(i+1, int(self.packOptions[i][1])))            
+            if(int(self.packOptions[i][1]) > 10000):
+                self.packOptions[i][3].set('Increase pack {} power : {:.2E} points'.format(i+1, int(self.packOptions[i][1])))
+            else:
+                self.packOptions[i][3].set('Increase pack {} power : {} points'.format(i+1, int(self.packOptions[i][1])))           
             tk.Button(self.fenprinc, textvariable = self.packOptions[i][3], command = lambda j=i : self.pack_upgrade(j)).place(x=300,y=240 + 50*i)
         else:
             self.prestigeBtnSet = True
@@ -84,10 +89,21 @@ class App(tk.Frame) :
 
     def farm(self, *args):
         delta = 0
+        string = ''
         for i in range(len(self.packOptions)):
             delta += self.packOptions[i][0]*self.packOptions[i][4]*self.prestigeMultiplier
         self.points+=delta
-        self.globalText.set('{:.2E} points ({:.2E} points/s)'.format(int(self.points), round((delta)*(1000/self.timeIdle), 2)))
+
+        if(int(self.points) > 10000):
+            string += "{:.2E} points".format(int(self.points))
+        else:
+            string += "{} points".format(int(self.points))
+
+        if(delta > 10000):
+            string += " ({:.2E} points/s)".format(round((delta)*(1000/self.timeIdle), 2))
+        else:
+            string += " ({} points/s)".format(round((delta)*(1000/self.timeIdle), 2))
+        self.globalText.set(string)
 
 
 
@@ -96,7 +112,11 @@ class App(tk.Frame) :
             self.points -= self.packOptions[args][1]
             self.packOptions[args][0] += 1
             self.packOptions[args][1] *= self.packOptions[args][2] 
-            self.packOptions[args][3].set('Increase pack {} power : {:.2E} points'.format(args+1, int(self.packOptions[args][1])))
+            if(int(self.packOptions[args][1]) > 1000):
+                self.packOptions[args][3].set('Increase pack {} power : {:.2E} points'.format(args+1, int(self.packOptions[args][1])))
+            else:
+                self.packOptions[args][3].set('Increase pack {} power : {} points'.format(args+1, int(self.packOptions[args][1])))
+
             self.packOptions[args][5].set('Pack {} : level {}'.format(args+1, self.packOptions[args][0] if self.packOptions[args][0]<32 else "MAX"))
 
 
@@ -123,12 +143,22 @@ class App(tk.Frame) :
 
     def idle_task(self):
         delta = 0
+        string = ''
         for i in range(len(self.packOptions)):
             delta += self.packOptions[i][0]*self.packOptions[i][4]*self.prestigeMultiplier
         self.points+=delta
-        print(self.points)
-        self.globalText.set('{:.2E} points ({:.2E} points/s)'.format(int(self.points), round(delta*(1000/self.timeIdle), 2)))
+        if(int(self.points) > 10000):
+            string += "{:.2E} points".format(int(self.points))
+        else:
+            string += "{} points".format(int(self.points))
+
+        if(delta > 10000):
+            string += " ({:.2E} points/s)".format(round((delta)*(1000/self.timeIdle), 2))
+        else:
+            string += " ({} points/s)".format(round((delta)*(1000/self.timeIdle), 2))
+        self.globalText.set(string)
         self.check_max_lvl()
+        # print(self.points)
         self.after(self.timeIdle, self.idle_task)
 
 
@@ -137,9 +167,9 @@ class App(tk.Frame) :
 if __name__ == "__main__" : 
     # init tk 
     fenetre = tk.Tk()
-#init app
+    #init app
     app = App(master = fenetre)
-#main loop
+    #main loop
     app.after(app.timeIdle, app.idle_task)
     app.mainloop()
 
